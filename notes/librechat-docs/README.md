@@ -70,7 +70,7 @@ librechat-docs/
 - [x] 建立 `.env`：`cp .env.example .env`，未修改任何值
 - [x] 啟動：`docker compose up -d`，http://localhost:3080 回 HTTP 200
 - [ ] 補上正式金鑰（`CREDS_*`、`JWT_*`），**要在註冊前做**
-- [ ] 設定 `ADMIN_PANEL_SESSION_SECRET`，啟用 http://localhost:3000
+- [x] 設定 `ADMIN_PANEL_SESSION_SECRET`，啟用 http://localhost:3000（[issue #1](https://github.com/JacobHsu/LibreChat/issues/1)）
 - [ ] 註冊第一個帳號（自動成為 ADMIN）
 - [ ] 掛載 `librechat.yaml`
 - [ ] 加 API key，完成第一次對話

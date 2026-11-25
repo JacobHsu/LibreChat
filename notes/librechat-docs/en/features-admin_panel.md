@@ -54,7 +54,8 @@ Feature permissions are not overrides: the switches that decide whether a role c
 The panel ships as the `admin-panel` service in LibreChat's `docker-compose.yml` and `deploy-compose.yml`, and it will not start until you set `ADMIN_PANEL_SESSION_SECRET` in `.env`. It needs LibreChat v0.8.5 or later. Ports, hosting it on its own domain, SSO redirects, every environment variable, and the admin API used by the panel are covered in [Admin Panel configuration](/docs/configuration/admin_panel).
 
 > [!NOTE]
-> **📝 本機附註：目前狀態與啟用步驟**
+> **📝 本機附註：啟用步驟與本機處理結果**
+> - ✅ **已處理**（[issue #1](https://github.com/JacobHsu/LibreChat/issues/1)）：設定 secret 後，`admin-panel` 為 `Up (healthy)`、`RestartCount=0`，http://localhost:3000 回 HTTP 200（`<title>LibreChat Admin Panel</title>`）。以下保留處理前的紀錄。
 > - 基本安裝後 `admin-panel` 容器處於 `Restarting` 迴圈，log 為：
 >   ```text
 >   [admin-panel] SESSION_SECRET must be set to at least 32 characters (got 0). Refusing to start.
@@ -65,6 +66,7 @@ The panel ships as the `admin-panel` service in LibreChat's `docker-compose.yml`
 >   1. 在 Git Bash 執行 `openssl rand -hex 32`，產生 64 個字元的隨機字串。
 >   2. 填入 `.env` 的 `ADMIN_PANEL_SESSION_SECRET=`。
 >   3. 執行 `docker compose up -d`，compose 會偵測到環境變數改變並重建 admin-panel。
+>      實際上 `rag_api` 也會一起重建：它用 `env_file: .env` 讀取整份 `.env`，`.env` 有任何改動都會被視為設定變更。LibreChat（`api`）則不會重建，因為它是把 `.env` 掛載成檔案、啟動時才讀取。
 >   4. 打開 http://localhost:3000，用 LibreChat 的第一個帳號登入。
 > - 這個 repo 是 LibreChat v0.8.9，符合「v0.8.5 以上」的需求。
 > - 官方中文版（`/zh/docs/features/admin_panel`）是較舊的翻譯，仍寫「預覽」狀態，原始碼連結也是舊的 `ClickHouse/librechat-admin-panel`；以這份英文版為準，新的 repo 是 <https://github.com/LibreChat-AI/admin-panel>。
