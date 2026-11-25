@@ -1,0 +1,70 @@
+---
+title: Admin Panel
+icon: LayoutDashboard
+description: A separate web app for managing LibreChat users, groups, roles, permissions, and configuration from the browser instead of editing librechat.yaml.
+---
+
+> [!NOTE]
+> **官方原文副本** — 線上版：<https://www.librechat.ai/docs/features/admin_panel>
+> 原始檔：[LibreChat-AI/librechat.ai `content/docs/features/admin_panel.mdx`](https://github.com/LibreChat-AI/librechat.ai/blob/408527900701f755d2817a02d0c9c6befe0f57df/content/docs/features/admin_panel.mdx)，commit `4085279`，2026-11-25 下載。
+> 這頁是「功能說明」；安裝與環境變數在 [configuration-admin_panel.md](configuration-admin_panel.md)。標示 **📝 本機附註** 的區塊為本機補充，其餘為原文。
+
+The Admin Panel is a separate web app for running a LibreChat instance from the browser. You use it to manage users, groups, and roles, decide what each role is allowed to do, hand out admin powers, and change configuration (for everyone, or only for a specific role or group) without editing `librechat.yaml` and restarting.
+
+It is its own service with its own URL, developed at [LibreChat-AI/admin-panel](https://github.com/LibreChat-AI/admin-panel). It keeps no data of its own: every change goes through LibreChat's admin API and lands in LibreChat's database.
+
+## Signing in
+
+You sign in with a LibreChat account, either with its email and password or through single sign-on configured on the instance, such as OpenID Connect or Google. The account needs the `ADMIN` role, or the `access:admin` capability granted to it (directly, or through one of its groups or its role). LibreChat checks this on every request, so the panel cannot give itself more access than the account has. Sessions end after 30 minutes of inactivity by default. With SSO, the panel refreshes your LibreChat session in the background, and each refresh checks again that the account is not banned and still has admin access; losing access ends the panel session.
+
+Once an admin panel URL is configured, users with admin access also find an **Admin Panel** link in LibreChat under **Settings > General**. Other users do not see it.
+
+> [!NOTE]
+> **📝 本機附註：用哪個帳號登入、連結在哪**
+> - 單租戶部署下，**第一個在 LibreChat（http://localhost:3080）註冊的帳號**自動成為 `ADMIN`，就用它登入 admin panel。admin panel 本身沒有註冊功能。
+> - 「admin panel URL is configured」指 LibreChat `.env` 的 `ADMIN_PANEL_URL`。`.env.example` 裡它是空的，而 `docker-compose.yml` 也不會幫你設（只有 `deploy-compose.yml` 會設成 `http://admin.localhost`）。
+>   所以用預設 compose 時，**Settings > General 不會出現 Admin Panel 連結**，要直接開 http://localhost:3000；想要連結就在 `.env` 設 `ADMIN_PANEL_URL=http://localhost:3000`。
+
+## What you can do
+
+The sidebar sections map to the main jobs:
+
+- **Users**: list and search every account on the instance, filter by role, and move people in and out of roles. (The panel has a delete action, but current LibreChat does not accept deletions through the admin API yet; use the delete-user script instead.)
+- **Access**: create custom roles beyond `USER` and `ADMIN` and edit the feature permissions of each role, and create groups and manage their members. Groups and roles created here can be picked in LibreChat's share dialogs.
+- **Configuration**: view and edit LibreChat's settings as forms. The forms are generated from LibreChat's own config schema, so new settings show up without updating the panel.
+- **Grants**: give individual admin capabilities, such as managing users or editing one section of the configuration, to a user, group, or role, without making them a full admin.
+
+What each person sees in the panel depends on their capabilities. Someone allowed to manage only the `interface` section, for example, sees only that section. Someone who can only read roles sees the roles but cannot change them; someone without any of the access capabilities gets an access denied page for that section.
+
+## Configuration for specific roles and groups
+
+Beyond the Base profile, which applies to everyone, you can save a profile of overrides for a single role, group, or user. Only the settings you change are stored in it; everything else is inherited. Each profile has a priority (role profiles default to 10, group to 20, user to 100), and when LibreChat builds a user's configuration it starts from `librechat.yaml` and the Base profile, then applies the profiles that match that user from the lowest priority to the highest, so a user profile wins over a group or role profile by default. That is how a research group gets extra endpoints, or contractors get a stricter interface, without running a second instance.
+
+A few things to know when editing configuration:
+
+- Changes are checked against the same rules as `librechat.yaml`. An edit that would make the configuration invalid is refused and nothing is saved. If an upgrade makes an older saved value invalid, LibreChat ignores that field, falls back to the value underneath, and logs a warning, so check the logs after upgrading.
+- API keys and other secrets you enter (for example for web search, speech, OCR, Langfuse, or custom endpoints) are stored encrypted and only shown masked afterwards. If you change where a saved key is sent, such as a server or base URL, you have to enter the key again.
+- `${ENV_VAR}` references are only accepted for variables LibreChat already knows about or that the operator allowed.
+- Some settings stay in `librechat.yaml` only: MCP servers that run a local process (`type: stdio`, or `command`, `args`, `env`), and Langfuse gateway headers. The panel cannot add, change, or remove them. Remote MCP servers can be managed normally.
+
+Feature permissions are not overrides: the switches that decide whether a role can use or share agents, prompts, and the rest are edited on the role itself under **Access**. See [Access Control](/docs/features/access_control) for how roles, groups, and capabilities fit together. Usage per agent is on the separate [Insights](/docs/features/insights) dashboard inside LibreChat.
+
+## Setup
+
+The panel ships as the `admin-panel` service in LibreChat's `docker-compose.yml` and `deploy-compose.yml`, and it will not start until you set `ADMIN_PANEL_SESSION_SECRET` in `.env`. It needs LibreChat v0.8.5 or later. Ports, hosting it on its own domain, SSO redirects, every environment variable, and the admin API used by the panel are covered in [Admin Panel configuration](/docs/configuration/admin_panel).
+
+> [!NOTE]
+> **📝 本機附註：目前狀態與啟用步驟**
+> - 基本安裝後 `admin-panel` 容器處於 `Restarting` 迴圈，log 為：
+>   ```text
+>   [admin-panel] SESSION_SECRET must be set to at least 32 characters (got 0). Refusing to start.
+>   error: script "start" exited with code 1
+>   ```
+>   原因是 `.env.example` 的 `ADMIN_PANEL_SESSION_SECRET` 為空，而 compose 設了 `restart: always`，所以會不斷重試。這不影響 LibreChat 本身。
+> - 啟用步驟：
+>   1. 在 Git Bash 執行 `openssl rand -hex 32`，產生 64 個字元的隨機字串。
+>   2. 填入 `.env` 的 `ADMIN_PANEL_SESSION_SECRET=`。
+>   3. 執行 `docker compose up -d`，compose 會偵測到環境變數改變並重建 admin-panel。
+>   4. 打開 http://localhost:3000，用 LibreChat 的第一個帳號登入。
+> - 這個 repo 是 LibreChat v0.8.9，符合「v0.8.5 以上」的需求。
+> - 官方中文版（`/zh/docs/features/admin_panel`）是較舊的翻譯，仍寫「預覽」狀態，原始碼連結也是舊的 `ClickHouse/librechat-admin-panel`；以這份英文版為準，新的 repo 是 <https://github.com/LibreChat-AI/admin-panel>。
