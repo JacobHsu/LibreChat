@@ -37,6 +37,21 @@ ADMIN_PANEL_SESSION_SECRET=replace-with-a-32-char-random-string
 > [!NOTE]
 > **📝 本機附註：admin-panel 一直重啟（Restarting）怎麼處理**
 >
+> ✅ **本機已處理**（[issue #1](https://github.com/JacobHsu/LibreChat/issues/1)），實際驗證結果：
+> ```text
+> $ docker compose ps admin-panel
+> admin-panel  Up 14 seconds (healthy)
+> $ docker inspect admin-panel --format '{{.RestartCount}}'   # 持續 60 秒後
+> 0
+> $ docker compose logs admin-panel
+> Admin panel listening on http://localhost:3000/
+> $ curl -o /dev/null -w '%{http_code}' http://localhost:3000/
+> 200
+> ```
+> log 中的 `ADMIN_PANEL_METRICS_SECRET is not set — /metrics will return 401` 是選填項目的提示，不影響使用。
+>
+> 以下保留處理前的紀錄與步驟。
+>
 > **現象**：`docker compose ps` 顯示 `admin-panel` 為 `Restarting`，`docker compose logs admin-panel` 不斷出現：
 > ```text
 > [admin-panel] SESSION_SECRET must be set to at least 32 characters (got 0). Refusing to start.
@@ -65,7 +80,8 @@ ADMIN_PANEL_SESSION_SECRET=replace-with-a-32-char-random-string
 >    ```bash
 >    docker compose up -d
 >    ```
->    compose 偵測到 admin-panel 的環境變數改變，只會重建這個容器。注意 `docker compose restart admin-panel` **不會**重新讀取 `.env`，一定要用 `up -d`。
+>    compose 偵測到 admin-panel 的環境變數改變，會重建這個容器。注意 `docker compose restart admin-panel` **不會**重新讀取 `.env`，一定要用 `up -d`。
+>    實際執行時 `rag_api` 也會一起重建：它用 `env_file: .env` 讀取整份 `.env`，`.env` 有任何改動都會被視為設定變更。LibreChat（`api`）、MongoDB 等其他容器則維持 `Running`。
 > 4. 確認：
 >    ```bash
 >    docker compose ps admin-panel        # 應變成 Up ... (healthy)

@@ -142,7 +142,7 @@ Click **Sign up** to create your account, then follow [Your First Chat](/docs/qu
 > **📝 本機附註：驗證時看到的狀態**
 > - `curl http://localhost:3080/` 回 HTTP 200，api log 出現 `Server listening on all interfaces at port 3080`、`Connected to MongoDB`、`RAG API is running and reachable at http://rag_api:8000`。
 > - api log 有一行 `error: Config file YAML format is invalid: ENOENT: no such file or directory, open '/app/librechat.yaml'`。這是**預期中的**：基本安裝沒有掛載 `librechat.yaml`，LibreChat 改用內建預設設定。要自訂才需要做下面的「Mounting librechat.yaml」。
-> - `admin-panel` 容器狀態為 `Restarting`，log：`SESSION_SECRET must be set to at least 32 characters (got 0). Refusing to start.` 也是預期中的，見 [features-admin_panel.md](features-admin_panel.md)。
+> - `admin-panel` 容器狀態為 `Restarting`，log：`SESSION_SECRET must be set to at least 32 characters (got 0). Refusing to start.` 也是預期中的，見 [features-admin_panel.md](features-admin_panel.md)。已在 [issue #1](https://github.com/JacobHsu/LibreChat/issues/1) 設定 `ADMIN_PANEL_SESSION_SECRET` 解決。
 > - 第一個註冊的帳號會成為 ADMIN，admin panel 也是用這個帳號登入，所以註冊前先把金鑰設好（見上方 `.env` 附註）。
 > - Windows 查 log：`docker compose logs api --tail 50`；持續追蹤加 `-f`。
 
