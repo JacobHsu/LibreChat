@@ -200,3 +200,7 @@ scripts/activity-labels/results/
 
 # Mutation testing sandboxes
 .stryker-tmp/
+
+# Understand-Anything knowledge graph (local learning aid)
+.ua/
+.understand-anything/
