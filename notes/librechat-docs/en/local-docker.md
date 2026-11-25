@@ -51,6 +51,23 @@ See the [Docker Override guide](/docs/configuration/docker_override) for more de
 > - Docker 可用記憶體約 31 GB、24 核心，遠高於官方的 2 GB 建議。
 > - x86 CPU 支援 AVX，上面的 AVX 注意事項不適用，`mongo:8.0.20` 可直接使用。
 
+> [!NOTE]
+> **📝 本機附註：容器必須能解析外部網域（官方沒寫到的前置需求）**
+>
+> 官方的前置需求只列 Git 和 Docker，但 LibreChat 要連雲端 LLM、RAG 的 embedding、網路搜尋等，都需要**容器本身**能查到外部網域。本機一開始就卡在這裡（[issue #9](https://github.com/JacobHsu/LibreChat/issues/9)）。
+>
+> - **現象**：登入、介面、Admin Panel 都正常，但 api 容器 `getent hosts github.com` 失敗，`nslookup` 回 `no servers could be reached`。`docker compose pull` 能成功，是因為拉映像由主機上的 Docker daemon 執行，不經過容器的 DNS，所以很容易沒發現。
+> - **原因**：`~/.docker/daemon.json` 被加了 `"dns": ["8.8.8.8", "1.1.1.1"]`。**這不是 Docker Desktop 的預設**（預設只有 `builder.gc` 和 `experimental`），LibreChat 官方安裝也不會動這個檔案。這個設定本身沒問題，但公司網路擋掉了公用 DNS，只允許內網 DNS，所以所有容器都查不到。
+> - **檢查方法**：
+>   ```bash
+>   docker run --rm --network host alpine:3 grep nameserver /etc/resolv.conf   # Docker VM 用的上游 DNS
+>   docker run --rm alpine:3 getent hosts github.com                            # 容器能不能查到外部網域
+>   ```
+> - **修法**：在 Docker Desktop → Settings → Docker Engine 刪除 `"dns"`，或直接編輯 `~/.docker/daemon.json`，然後 `docker desktop restart`。
+>   之後 Docker VM 的上游變成 Docker Desktop 內建的 DNS（`192.168.65.7`）。它由主機代為查詢，會跟著主機當下的網路走，換網路也不用再改。
+>   重啟 Docker Desktop 會讓**所有**容器重啟一次；重啟策略是 `always` / `unless-stopped` 的容器會自動回來。本機 23 個容器全數恢復。
+> - **不建議**的替代做法：在 override 寫死公司內網 DNS。離開公司網路就失效。
+
 ## Installation
 
 <Steps>
@@ -151,6 +168,7 @@ Click **Sign up** to create your account, then follow [Your First Chat](/docs/qu
 > - `admin-panel` 容器狀態為 `Restarting`，log：`SESSION_SECRET must be set to at least 32 characters (got 0). Refusing to start.` 也是預期中的，見 [features-admin_panel.md](features-admin_panel.md)。已在 [issue #1](https://github.com/JacobHsu/LibreChat/issues/1) 設定 `ADMIN_PANEL_SESSION_SECRET` 解決。
 > - 第一個註冊的帳號會成為 ADMIN，admin panel 也是用這個帳號登入，所以註冊前先把金鑰設好（見上方 `.env` 附註）。
 > - 登入前 api log 可能出現 `[refreshController] Invalid refresh token: invalid signature`，接著才是 `Login successful`。這不是故障：瀏覽器的 cookie 依主機名稱區分、**不分 port**，之前跑在 `localhost:3080` 的另一套 LibreChat 用不同金鑰簽發的 refresh token cookie 還留在瀏覽器裡，新的 stack 驗證不了，重新登入後就會被新的 cookie 取代。這個錯誤在固定金鑰之前（仍使用暫時金鑰時）就出現過，與 issue #3 無關。
+>   同樣的原因也適用於**同時開著的另一套** LibreChat：本機 `libre-chat-sep` 在 `localhost:3081`，與這套的 `localhost:3080` 共用同一組 cookie，兩邊金鑰不同，所以在同一個瀏覽器輪流使用時會互相覆蓋 refresh token、各自要求重新登入（之後在 09:09 又觀察到一次相同模式）。要兩套同時用，可以讓其中一套改用 `http://127.0.0.1:<port>` 開，或改用不同的瀏覽器設定檔。
 > - Windows 查 log：`docker compose logs api --tail 50`；持續追蹤加 `-f`。
 
   </Step>

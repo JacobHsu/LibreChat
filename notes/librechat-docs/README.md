@@ -77,6 +77,7 @@ librechat-docs/
 - [x] 設定 `ADMIN_PANEL_SESSION_SECRET`，啟用 http://localhost:3000（[issue #1](https://github.com/JacobHsu/LibreChat/issues/1)）
 - [x] 註冊第一個帳號（自動成為 ADMIN），已驗證可登入 LibreChat 與 Admin Panel
 - [x] 掛載 `librechat.yaml`：最小設定（[issue #6](https://github.com/JacobHsu/LibreChat/issues/6)）
+- [x] 容器能解析外部網域：移除 `~/.docker/daemon.json` 的 `dns`（[issue #9](https://github.com/JacobHsu/LibreChat/issues/9)）
 - [ ] 加 API key，完成第一次對話
 
 ## 常用指令（在 repo 根目錄執行）
