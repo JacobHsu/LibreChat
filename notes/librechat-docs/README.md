@@ -33,6 +33,8 @@ librechat-docs/
 | [en/configuration-admin_panel.md](en/configuration-admin_panel.md) | Admin Panel 的部署方式、環境變數、Admin API | <https://www.librechat.ai/docs/configuration/admin_panel> |
 | [en/configuration-docker_override.md](en/configuration-docker_override.md) | 用 `docker-compose.override.yml` 自訂設定 | <https://www.librechat.ai/docs/configuration/docker_override> |
 | [en/configuration-librechat_yaml.md](en/configuration-librechat_yaml.md) | `librechat.yaml` 的建立、掛載、驗證、排錯 | <https://www.librechat.ai/docs/configuration/librechat_yaml> |
+| [en/features-scheduled_chats.md](en/features-scheduled_chats.md) | 排程對話是什麼（實驗性、本機未開啟） | <https://www.librechat.ai/docs/features/scheduled_chats> |
+| [en/configuration-scheduled_chats.md](en/configuration-scheduled_chats.md) | 排程對話的設定與部署需求；**附註：啟動 log 的 `scheduler NOT started`** | <https://www.librechat.ai/docs/configuration/scheduled_chats> |
 
 ### `zh/`：中文翻譯，僅供對照
 
@@ -43,6 +45,7 @@ librechat-docs/
 | [zh/configuration-librechat_yaml.md](zh/configuration-librechat_yaml.md) | <https://www.librechat.ai/zh/docs/configuration/librechat_yaml> | 與英文版同一天更新（2026-11-17），內容是最新的 |
 | [zh/features-admin_panel.md](zh/features-admin_panel.md) | <https://www.librechat.ai/zh/docs/features/admin_panel> | **已過時**：仍寫「預覽」狀態，原始碼連結是舊的 `ClickHouse/librechat-admin-panel` |
 | [zh/configuration-admin_panel.md](zh/configuration-admin_panel.md) | 無（中文網址會轉到英文版） | **非官方翻譯**：官方沒有中文版，由英文原文（commit `4085279`）翻成繁體中文。**含一段附註：admin-panel 一直重啟的設定步驟** |
+| — | — | `features-scheduled_chats`、`configuration-scheduled_chats` 官方沒有中文版 |
 
 中文版是簡體機器翻譯，而且比英文版舊（英文版 docker 頁更新於 2026-10-23、admin panel 頁更新於 2026-10-29）。兩者不同時以英文版為準。
 
