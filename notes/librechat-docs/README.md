@@ -35,6 +35,8 @@ librechat-docs/
 | [en/configuration-librechat_yaml.md](en/configuration-librechat_yaml.md) | `librechat.yaml` 的建立、掛載、驗證、排錯 | <https://www.librechat.ai/docs/configuration/librechat_yaml> |
 | [en/features-scheduled_chats.md](en/features-scheduled_chats.md) | 排程對話是什麼（實驗性、本機未開啟） | <https://www.librechat.ai/docs/features/scheduled_chats> |
 | [en/configuration-scheduled_chats.md](en/configuration-scheduled_chats.md) | 排程對話的設定與部署需求；**附註：啟動 log 的 `scheduler NOT started`** | <https://www.librechat.ai/docs/configuration/scheduled_chats> |
+| [en/librechat_yaml-ai_endpoints-azure.md](en/librechat_yaml-ai_endpoints-azure.md) | Azure OpenAI 設定指南；**附註：本機設定與第一次對話** | <https://www.librechat.ai/docs/configuration/librechat_yaml/ai_endpoints/azure> |
+| [en/librechat_yaml-object_structure-azure_openai.md](en/librechat_yaml-object_structure-azure_openai.md) | `azureOpenAI` 欄位參考 | <https://www.librechat.ai/docs/configuration/librechat_yaml/object_structure/azure_openai> |
 
 ### `zh/`：中文翻譯，僅供對照
 
@@ -45,6 +47,8 @@ librechat-docs/
 | [zh/configuration-librechat_yaml.md](zh/configuration-librechat_yaml.md) | <https://www.librechat.ai/zh/docs/configuration/librechat_yaml> | 與英文版同一天更新（2026-11-17），內容是最新的 |
 | [zh/features-admin_panel.md](zh/features-admin_panel.md) | <https://www.librechat.ai/zh/docs/features/admin_panel> | **已過時**：仍寫「預覽」狀態，原始碼連結是舊的 `ClickHouse/librechat-admin-panel` |
 | [zh/configuration-admin_panel.md](zh/configuration-admin_panel.md) | 無（中文網址會轉到英文版） | **非官方翻譯**：官方沒有中文版，由英文原文（commit `4085279`）翻成繁體中文。**含一段附註：admin-panel 一直重啟的設定步驟** |
+| [zh/librechat_yaml-ai_endpoints-azure.md](zh/librechat_yaml-ai_endpoints-azure.md) | <https://www.librechat.ai/zh/docs/configuration/librechat_yaml/ai_endpoints/azure> | 2026-06-23 翻譯，英文版已於 2026-10-29 更新 |
+| [zh/librechat_yaml-object_structure-azure_openai.md](zh/librechat_yaml-object_structure-azure_openai.md) | <https://www.librechat.ai/zh/docs/configuration/librechat_yaml/object_structure/azure_openai> | 2026-06-23 翻譯，英文版已於 2026-11-06 更新 |
 | — | — | `features-scheduled_chats`、`configuration-scheduled_chats` 官方沒有中文版 |
 
 中文版是簡體機器翻譯，而且比英文版舊（英文版 docker 頁更新於 2026-10-23、admin panel 頁更新於 2026-10-29）。兩者不同時以英文版為準。
@@ -78,7 +82,7 @@ librechat-docs/
 - [x] 註冊第一個帳號（自動成為 ADMIN），已驗證可登入 LibreChat 與 Admin Panel
 - [x] 掛載 `librechat.yaml`：最小設定（[issue #6](https://github.com/JacobHsu/LibreChat/issues/6)）
 - [x] 容器能解析外部網域：移除 `~/.docker/daemon.json` 的 `dns`（[issue #9](https://github.com/JacobHsu/LibreChat/issues/9)）
-- [ ] 加 API key，完成第一次對話
+- [x] 加 API key，完成第一次對話：Azure OpenAI `gpt-5.4-mini`，對話與自動標題皆正常
 
 ## 常用指令（在 repo 根目錄執行）
 
