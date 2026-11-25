@@ -102,6 +102,12 @@ On Windows, use `copy .env.example .env` if `cp` is not available.
 >   也就是 LibreChat 自己產生一組暫時金鑰，存在 named volume `librechat_librechat-data`（掛在容器 `/app/data`）。這就是官方說「開箱即用」的原因。
 > - 這組金鑰用來加密使用者存的 API key、簽發登入 token。之後才改成正式值，key-drift 檢查會發現金鑰變了：先前加密的資料解不開、登入 session 失效。
 >   **建議在註冊第一個帳號前就寫入正式值。** 官方產生器：<https://www.librechat.ai/toolkit/creds-generator>，或在 Git Bash 用 `openssl rand -hex 32`（`CREDS_IV` 用 `openssl rand -hex 16`）。
+> - ✅ **本機實際做法**（[issue #3](https://github.com/JacobHsu/LibreChat/issues/3)）：帳號在設定正式金鑰前就註冊了，所以**沒有**產生新金鑰，而是把暫時金鑰原封不動固定到 `.env`。
+>   - 為什麼不產生新的：第一次啟動時，LibreChat 已把金鑰指紋寫進 MongoDB 的 `librechatCredentialMetadata`（`packages/api/src/app/checks.ts`）。換成新金鑰會讓登入 session 失效，而且之後每次啟動都會出現 `Active fingerprints ... do not match the database credential record` 警告。程式碼明確要求「Do not overwrite the database marker」，所以不能靠刪掉那筆紀錄來消除警告。
+>   - 為什麼可以直接沿用：暫時金鑰本來就是隨機產生的強金鑰，格式正確；寫進 `.env` 後指紋仍吻合。`.env` 的值優先於 `.env.temp`（`packages/api/src/credentials.ts` 的 `bootstrapCredentials`），之後 `.env` 就是唯一來源，刪掉 volume 也不會遺失金鑰。
+>   - 做法：從容器讀 `/app/data/.env.temp`，用 `sed` 寫入 `.env` 的 4 行（不印出值），比對兩邊完全一致後，`docker compose up -d`（rag_api 會重建）再 `docker compose restart api`。
+>   - 驗證：重啟後 log 沒有 `Temporary credentials` 和 fingerprint mismatch 警告；既有帳號可以登入 LibreChat 和 Admin Panel。
+>   - **Git Bash 陷阱**：`docker compose exec api cat /app/data/.env.temp` 會失敗（`can't open 'C:/Program Files/Git/app/data/.env.temp'`），因為 Git Bash 把看起來像 Unix 路徑的參數自動轉成 Windows 路徑。要寫成 `docker compose exec api sh -c 'cat /app/data/.env.temp'`，或在指令前加 `MSYS_NO_PATHCONV=1`。
 > - 另外 `.env.example` 預設 `SEARCH=false`：Meilisearch 容器會啟動，但對話搜尋預設不啟用；要用需改 `SEARCH=true` 並設定 `MEILI_MASTER_KEY`。
 
   </Step>
@@ -144,6 +150,7 @@ Click **Sign up** to create your account, then follow [Your First Chat](/docs/qu
 > - api log 有一行 `error: Config file YAML format is invalid: ENOENT: no such file or directory, open '/app/librechat.yaml'`。這是**預期中的**：基本安裝沒有掛載 `librechat.yaml`，LibreChat 改用內建預設設定。要自訂才需要做下面的「Mounting librechat.yaml」。
 > - `admin-panel` 容器狀態為 `Restarting`，log：`SESSION_SECRET must be set to at least 32 characters (got 0). Refusing to start.` 也是預期中的，見 [features-admin_panel.md](features-admin_panel.md)。已在 [issue #1](https://github.com/JacobHsu/LibreChat/issues/1) 設定 `ADMIN_PANEL_SESSION_SECRET` 解決。
 > - 第一個註冊的帳號會成為 ADMIN，admin panel 也是用這個帳號登入，所以註冊前先把金鑰設好（見上方 `.env` 附註）。
+> - 登入前 api log 可能出現 `[refreshController] Invalid refresh token: invalid signature`，接著才是 `Login successful`。這不是故障：瀏覽器的 cookie 依主機名稱區分、**不分 port**，之前跑在 `localhost:3080` 的另一套 LibreChat 用不同金鑰簽發的 refresh token cookie 還留在瀏覽器裡，新的 stack 驗證不了，重新登入後就會被新的 cookie 取代。這個錯誤在固定金鑰之前（仍使用暫時金鑰時）就出現過，與 issue #3 無關。
 > - Windows 查 log：`docker compose logs api --tail 50`；持續追蹤加 `-f`。
 
   </Step>
