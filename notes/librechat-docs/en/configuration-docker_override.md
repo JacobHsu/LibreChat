@@ -8,7 +8,7 @@ description: Use a docker-compose.override.yml file to customize LibreChat's Doc
 > **官方原文副本** — 線上版：<https://www.librechat.ai/docs/configuration/docker_override>（中文版：<https://www.librechat.ai/zh/docs/configuration/docker_override>）
 > 原始檔：[LibreChat-AI/librechat.ai `content/docs/configuration/docker_override.mdx`](https://github.com/LibreChat-AI/librechat.ai/blob/408527900701f755d2817a02d0c9c6befe0f57df/content/docs/configuration/docker_override.mdx)，commit `4085279`，2026-11-25 下載。
 > 標示 **📝 本機附註** 的區塊為本機補充，其餘為原文。
-> 狀態：本機**尚未建立** override，目前完全使用官方 `docker-compose.yml`。
+> 狀態：本機已建立 override，**只啟用**「USE LIBRECHAT CONFIG FILE」一段，也就是掛載 `librechat.yaml`（[issue #6](https://github.com/JacobHsu/LibreChat/issues/6)）。其餘仍是官方 `docker-compose.yml` 的預設值。
 
 A Docker Compose override file lets you change the default configuration in `docker-compose.yml` without editing or duplicating it. Override files are mainly for local customizations. When you run `docker compose up`, Compose merges `docker-compose.yml` with `docker-compose.override.yml` automatically.
 

@@ -32,6 +32,7 @@ librechat-docs/
 | [en/features-admin_panel.md](en/features-admin_panel.md) | Admin Panel 是什麼、能做什麼、怎麼登入 | <https://www.librechat.ai/docs/features/admin_panel> |
 | [en/configuration-admin_panel.md](en/configuration-admin_panel.md) | Admin Panel 的部署方式、環境變數、Admin API | <https://www.librechat.ai/docs/configuration/admin_panel> |
 | [en/configuration-docker_override.md](en/configuration-docker_override.md) | 用 `docker-compose.override.yml` 自訂設定 | <https://www.librechat.ai/docs/configuration/docker_override> |
+| [en/configuration-librechat_yaml.md](en/configuration-librechat_yaml.md) | `librechat.yaml` 的建立、掛載、驗證、排錯 | <https://www.librechat.ai/docs/configuration/librechat_yaml> |
 
 ### `zh/`：中文翻譯，僅供對照
 
@@ -39,6 +40,7 @@ librechat-docs/
 |---|---|---|
 | [zh/local-docker.md](zh/local-docker.md) | <https://www.librechat.ai/zh/docs/local/docker> | 2026-09-24 翻譯，缺「System Requirements」、admin panel 說明，排錯段落沒有 `!override` |
 | [zh/configuration-docker_override.md](zh/configuration-docker_override.md) | <https://www.librechat.ai/zh/docs/configuration/docker_override> | — |
+| [zh/configuration-librechat_yaml.md](zh/configuration-librechat_yaml.md) | <https://www.librechat.ai/zh/docs/configuration/librechat_yaml> | 與英文版同一天更新（2026-11-17），內容是最新的 |
 | [zh/features-admin_panel.md](zh/features-admin_panel.md) | <https://www.librechat.ai/zh/docs/features/admin_panel> | **已過時**：仍寫「預覽」狀態，原始碼連結是舊的 `ClickHouse/librechat-admin-panel` |
 | [zh/configuration-admin_panel.md](zh/configuration-admin_panel.md) | 無（中文網址會轉到英文版） | **非官方翻譯**：官方沒有中文版，由英文原文（commit `4085279`）翻成繁體中文。**含一段附註：admin-panel 一直重啟的設定步驟** |
 
@@ -50,7 +52,6 @@ librechat-docs/
 |---|---|---|
 | `.env` 完整參考 | <https://www.librechat.ai/docs/configuration/dotenv> | 設定金鑰、provider、登入方式 |
 | 金鑰產生器 | <https://www.librechat.ai/toolkit/creds-generator> | 產生 `CREDS_KEY`、`CREDS_IV`、`JWT_SECRET`、`JWT_REFRESH_SECRET` |
-| `librechat.yaml` 設定 | <https://www.librechat.ai/docs/configuration/librechat_yaml> | 掛載 `librechat.yaml` 時 |
 | YAML 檢查器 | <https://www.librechat.ai/toolkit/yaml-checker> | 驗證 `librechat.yaml` |
 | 第一次對話 | <https://www.librechat.ai/docs/quick_start/first_chat> | 註冊後加 API key |
 | 自訂 endpoint | <https://www.librechat.ai/docs/quick_start/custom_endpoints> | 接 OpenRouter、Ollama 等 |
@@ -72,7 +73,7 @@ librechat-docs/
 - [x] 固定正式金鑰（`CREDS_*`、`JWT_*`）：因為已先註冊，改為沿用暫時金鑰（[issue #3](https://github.com/JacobHsu/LibreChat/issues/3)）
 - [x] 設定 `ADMIN_PANEL_SESSION_SECRET`，啟用 http://localhost:3000（[issue #1](https://github.com/JacobHsu/LibreChat/issues/1)）
 - [x] 註冊第一個帳號（自動成為 ADMIN），已驗證可登入 LibreChat 與 Admin Panel
-- [ ] 掛載 `librechat.yaml`
+- [x] 掛載 `librechat.yaml`：最小設定（[issue #6](https://github.com/JacobHsu/LibreChat/issues/6)）
 - [ ] 加 API key，完成第一次對話
 
 ## 常用指令（在 repo 根目錄執行）

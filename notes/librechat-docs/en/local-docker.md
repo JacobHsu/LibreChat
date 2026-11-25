@@ -192,6 +192,7 @@ For full setup instructions including creating the file from scratch, see the [l
 > - `librechat.yaml` 與 `docker-compose.override.yml` 都已被 `.gitignore` 排除。
 > - 修改 `librechat.yaml` 後只需重啟 api：`docker compose restart api`；改了 override 或 `.env` 才需要 `docker compose up -d`（會重建受影響的容器）。
 > - 寫完可用官方 YAML 檢查器驗證：<https://www.librechat.ai/toolkit/yaml-checker>（原文 Troubleshooting 的連結 `/toolkit/yaml_checker` 用底線，實際網址是連字號）。
+> - ✅ **本機已完成**（[issue #6](https://github.com/JacobHsu/LibreChat/issues/6)），用的是最小設定（只有 `version` 與 `cache`）。步驟與驗證結果見 [configuration-librechat_yaml.md](configuration-librechat_yaml.md) 的附註。
 
 ## Updating LibreChat
 
