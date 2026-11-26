@@ -63,7 +63,7 @@ Most:
 - `api/server/routes/share.js` and `packages/api/src/shared-links/`: public, unauthenticated reads.
 - `client/src/` rendering of markdown, code blocks, citations, MCP UI resources and artifacts.
 
-Least: `e2e/`, `scripts/`, `config/` (operator CLI scripts), `helm/`, `docs/`, `vendor/`, `utils/`,
+Least: `e2e/`, `scripts/`, `config/` (operator CLI scripts), `docs/`, `vendor/`, `utils/`,
 `redis-config/`, docker-compose files, and test files and fixtures.
 
 ## How to exercise it
