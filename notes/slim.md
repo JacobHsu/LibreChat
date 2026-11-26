@@ -32,6 +32,10 @@
   因為該 workflow 不在保留清單內（CI 修正 PR）。
 - `.github/workflows/playwright-mock.yml`：`shard_timings` 的註解改為說明此 fork 沒有
   timings 寫入端（CI 修正 PR）。
+- `.github/workflows/playwright-mock.yml`：`pull_request` 與 `push` 的 `paths` 多排除
+  `.gitignore`、`.env.example`、`librechat.example.yaml`、`rag.yml`、compose 檔、
+  `.devcontainer/`、`.vscode/`、`.codex/`、`.oss-scanner/`，只改這些檔案的 PR 不跑約 26 分鐘的 e2e。
+  採黑名單：沒列到的檔案一律照跑。這些檔案都已確認沒有 e2e spec 讀取；新增排除前要再確認一次。
 - `e2e/specs/mock/scenarios/ci-setup.spec.ts`：共用依賴快取的必要參與者清單拿掉
   `lighthouse.yml lighthouse`，原因同上（CI 修正 PR）。
 
@@ -132,6 +136,8 @@ git ls-files .github/workflows | grep -v -E "/($keep)\.yml$" | xargs -r git rm -
 - `packages/api/src/protection/conformance/README.md`：Trace exports 列的 `otelcol.yaml` 路徑。
 - `.github/scripts/playwright-matrix.test.mjs`、`e2e/specs/mock/scenarios/ci-setup.spec.ts`：
   移除對 `playwright-timings.yml`、`lighthouse.yml` 的依賴（見第 1 節）。
+- `.github/workflows/playwright-mock.yml`：加回 e2e 的設定檔排除清單（見第 1 節）。
+  上游若改了 `paths`，兩邊的 `pull_request` 與 `push` 清單要保持一致。
 - `.gitignore`：保留 `*.d.ts` 與 `!/examples/sdk-runtime/librechat.yaml` 的 `!` 例外規則；
   用新的上游 `.gitignore` 覆蓋時要加回去，否則那 6 個型別宣告檔與範例設定片段會再次消失。
 - 第 2 節 `.github/` 底下的其他檔案與頂層項目：視需要刪除。

@@ -1,12 +1,26 @@
 name: Playwright E2E Tests
 
 on:
+  # This fork skips the suite when a change only touches deployment config, editor or tooling
+  # files that no spec reads (see notes/slim.md). Anything not listed still runs it, so a new
+  # file is tested by default. push must keep the same list (playwright-matrix.test.mjs).
   pull_request:
     paths:
       - '**'
       - '!**.md'
       - '!.github/workflows/**'
       - '.github/workflows/playwright-mock.yml'
+      - '!.gitignore'
+      - '!.env.example'
+      - '!librechat.example.yaml'
+      - '!rag.yml'
+      - '!docker-compose*.yml'
+      - '!deploy-compose*.yml'
+      - '!docker-compose.override.yml.example'
+      - '!.devcontainer/**'
+      - '!.vscode/**'
+      - '!.codex/**'
+      - '!.oss-scanner/**'
   # Post-merge safety net, as backend-review.yml and frontend-review.yml have for jest. A
   # regression that reaches dev fails this suite on every open pull request, and without a run
   # on dev itself nothing names the merge that caused it. A push runs the pull request profile
@@ -20,6 +34,17 @@ on:
       - '!**.md'
       - '!.github/workflows/**'
       - '.github/workflows/playwright-mock.yml'
+      - '!.gitignore'
+      - '!.env.example'
+      - '!librechat.example.yaml'
+      - '!rag.yml'
+      - '!docker-compose*.yml'
+      - '!deploy-compose*.yml'
+      - '!docker-compose.override.yml.example'
+      - '!.devcontainer/**'
+      - '!.vscode/**'
+      - '!.codex/**'
+      - '!.oss-scanner/**'
   # The merge queue tests the commit about to land on dev. It has no path filter and runs
   # the pull request profile with no lane narrowed, so a failure in the queue is one the
   # pull request's own checks can reproduce.
