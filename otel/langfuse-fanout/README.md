@@ -85,20 +85,17 @@ rest. The keys are not defined in this gateway config.
   (`eu`, `us`, `jp`). Compose's static collector config routes only those keys;
   the gateway fails startup when `LANGFUSE_FANOUT_TENANT_DESTINATIONS` contains
   a key outside `LANGFUSE_FANOUT_TRACE_DESTINATION_KEYS`. For self-hosted or
-  additional destination keys, update the collector config too or use Helm.
-- Helm binds the internal collector receiver to `127.0.0.1:4319` because the
-  collector is a sidecar. Compose binds it to `0.0.0.0:4319` on the private
+  additional destination keys, update the collector config too.
+- Compose binds the internal collector receiver to `0.0.0.0:4319` on the private
   `langfuse-fanout` network. Do not publish the internal collector receiver
   outside the fanout deployment; tenant routing validation happens in the
   gateway before traces reach the collector.
 - The gateway stores short-lived one-time media upload plans in Redis. This lets
   media create and byte-upload requests land on different gateway replicas.
-  Compose includes a private Redis container; Helm can derive the URI from the
-  bundled Redis chart or use an explicit `langfuseFanout.redis.uri`.
+  Compose includes a private Redis container.
 - The gateway requires an explicit public/internal base URL for one-time upload
   URLs. Compose sets `LANGFUSE_FANOUT_PUBLIC_URL` to its private gateway
-  service URL. Helm derives the fanout Service DNS name unless `publicUrl` is
-  set.
+  service URL.
 - Media fanout is not transactional across central and tenant projects. If one
   destination accepts `POST /api/public/media` and another fails, LibreChat sees
   a gateway error and will not upload bytes, but the successful destination may
@@ -171,90 +168,7 @@ The override builds the fanout gateway image, sets `LANGFUSE_FANOUT_ENABLED=true
 `http://langfuse-fanout-collector:4318`. It also starts an internal
 `langfuse-fanout-otel` service on the private fanout network for trace export.
 
-## Helm
-
-The Compose overrides build the gateway image locally. For Kubernetes, build
-the same image from the repository root, push it to a registry available to
-the cluster, and set `langfuseFanout.image.repository` and `.tag` to match:
-
-```sh
-docker build \
-  -f otel/langfuse-fanout/Dockerfile \
-  -t registry.example.com/librechat-langfuse-fanout:<tag> .
-docker push registry.example.com/librechat-langfuse-fanout:<tag>
-```
-
-Create a secret containing the central Langfuse Basic auth header:
-
-```sh
-kubectl create secret generic langfuse-central \
-  --from-literal=LANGFUSE_FANOUT_CENTRAL_AUTH_HEADER='Basic <base64-public-key-colon-secret-key>'
-```
-
-Enable the gateway in values. Use either the bundled Redis chart as shown here
-or set `langfuseFanout.redis.uri` to an external Redis service.
-
-```yaml
-redis:
-  enabled: true
-
-langfuseFanout:
-  enabled: true
-  image:
-    repository: registry.example.com/librechat-langfuse-fanout
-    tag: '<tag>'
-    pullPolicy: IfNotPresent
-  central:
-    baseUrl: https://cloud.langfuse.com
-    authHeaderSecret:
-      name: langfuse-central
-      key: LANGFUSE_FANOUT_CENTRAL_AUTH_HEADER
-  metrics:
-    secret:
-      name: librechat-metrics
-      key: METRICS_SECRET
-  tenant:
-    destinations:
-      eu:
-        baseUrl: https://cloud.langfuse.com
-      us:
-        baseUrl: https://us.cloud.langfuse.com
-      jp:
-        baseUrl: https://jp.cloud.langfuse.com
-  upstreamTimeout: 30s
-  publicUrl: ''
-  otelCollector:
-    receiverEndpoint: 127.0.0.1:4319
-  redis:
-    uri: ''
-    username: ''
-    passwordSecret:
-      name: ''
-      key: REDIS_PASSWORD
-    keyPrefix: langfuse-fanout
-  memoryLimitMiB: 256
-  memorySpikeLimitMiB: 64
-  batchTimeout: 1s
-  batchSendSize: 128
-  metadataCardinalityLimit: 1000
-```
-
-The chart renders one fanout Deployment with two containers: the gateway on
-`4318` and an internal OpenTelemetry collector on `4319`. The Service exposes
-only the gateway. The chart also injects `LANGFUSE_FANOUT_ENABLED` plus
-`LANGFUSE_FANOUT_COLLECTOR_URL` into the LibreChat app ConfigMap when they are
-not already supplied in `librechat.configEnv`.
-
-Set `langfuseFanout.redis.uri` when using an external Redis service. If Redis
-requires auth, set `langfuseFanout.redis.username` and point
-`langfuseFanout.redis.passwordSecret.name`/`.key` at an existing Kubernetes
-Secret. When using the bundled Redis chart with auth enabled, create a password
-Secret for the gateway or provide an explicit authenticated URI.
-Prefer `passwordSecret` over embedding credentials in `redis.uri`, because the
-URI is rendered directly into the Deployment environment.
-Scale the gateway manually with `langfuseFanout.replicaCount`; the chart does
-not create a fanout HPA. The gateway container has configurable `/healthz`
-liveness and readiness probes under `langfuseFanout`.
+## Metrics and Logs
 
 Useful gateway metrics include:
 
@@ -297,9 +211,9 @@ already uploaded.
 - `LANGFUSE_FANOUT_CENTRAL_BASE_URL` is also consumed by the fanout deployment only.
   For non-EU central feedback scores, set LibreChat's normal `LANGFUSE_BASE_URL`
   to the same central Langfuse region.
-- Tenant destinations default to the three configured Langfuse Cloud regions. Add or
-  override `langfuseFanout.tenant.destinations` in Helm for self-hosted or
-  custom destinations.
+- Tenant destinations default to the three configured Langfuse Cloud regions. For
+  self-hosted or custom destinations, update `LANGFUSE_FANOUT_TENANT_DESTINATIONS`
+  and the collector config together.
 - `LANGFUSE_FANOUT_LISTEN_ADDR` controls the gateway HTTP bind address and
   defaults to `:4318`.
 - `LANGFUSE_FANOUT_UPSTREAM_TIMEOUT` tunes the timeout for gateway calls to
