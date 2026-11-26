@@ -134,6 +134,13 @@ release/
 
 !/client/src/@types/i18next.d.ts
 !/client/src/@types/react.d.ts
+# Hand-written declarations that upstream tracks despite *.d.ts above
+!/packages/api/src/types/bcryptjs.d.ts
+!/packages/api/src/types/es2024-string.d.ts
+!/packages/api/src/types/proxy-from-env.d.ts
+!/packages/api/types/index.d.ts
+!/packages/chat/src/modules.d.ts
+!/packages/data-schemas/src/types/winston-transports.d.ts
 
 # SAML Idp cert
 *.cert
