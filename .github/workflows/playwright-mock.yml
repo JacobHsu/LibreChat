@@ -183,13 +183,12 @@ jobs:
           exit 0
 
   # Every shard has to plan from the same timings, or the partition stops being disjoint and a
-  # spec runs twice or not at all. The newest recorded copy is therefore resolved once, here,
-  # and handed to the shards as a job output: a shard that restored the cache itself could see
-  # a newer entry than its siblings, and a re-run shard a newer one than the attempt it joins.
-  # playwright-timings.yml writes the cache from green runs on dev, and a pull request reads
-  # dev's entries as its base branch. With no entry or a malformed one the output is empty and
-  # every shard plans from the committed e2e/timings.mock.json, so nothing in this job fails on
-  # the data; like every job here it still answers to the gate.
+  # spec runs twice or not at all, so the timings are resolved once, here, and handed to the
+  # shards as a job output. Upstream restores recorded timings that playwright-timings.yml
+  # publishes; this fork does not carry that recorder (see notes/slim.md), so no file is
+  # present and every shard plans from the committed e2e/timings.mock.json. A malformed file
+  # also falls back to it, so nothing in this job fails on the data; like every job here it
+  # still answers to the gate.
   shard_timings:
     name: Shard timings
     if: >-
@@ -206,15 +205,6 @@ jobs:
     outputs:
       timings: ${{ steps.read.outputs.timings }}
     steps:
-      - name: Restore the newest recorded timings
-        id: restore
-        continue-on-error: true
-        uses: actions/cache/restore@v5
-        with:
-          path: e2e/.generated/shard-timings.json
-          key: e2e-shard-timings-${{ github.run_id }}-${{ github.run_attempt }}
-          restore-keys: e2e-shard-timings-
-
       - name: Hand one copy to every shard
         id: read
         run: |
