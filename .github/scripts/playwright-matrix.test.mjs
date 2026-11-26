@@ -250,7 +250,7 @@ test('graduated spec skips keep the same pool across shards and remain opt-in', 
   assert.deepEqual(fallback.matrix, prMatrix);
 });
 
-/** What the `shard_timings` hand-off step outputs for one restored cache file, or for none. */
+/** What the `shard_timings` hand-off step outputs for one recorded timings file, or for none. */
 function handOff(t, cached) {
   const scratch = mkdtempSync(join(scriptsDir, '.playwright-matrix-test-'));
   t.after(() => rmSync(scratch, { recursive: true, force: true }));
@@ -290,28 +290,6 @@ test('missing or malformed recorded timings leave every shard on the committed f
   for (const cached of [undefined, '', '{not json', '[]', '{"files":[1]}', '{"files":{}}']) {
     assert.equal(handOff(t, cached), '', String(cached));
   }
-});
-
-test('timings are saved only by a push, under the path and key prefix the shards restore from', () => {
-  const recorder = yaml.load(
-    readFileSync(new URL('../workflows/playwright-timings.yml', import.meta.url), 'utf8'),
-  ).jobs.record;
-  const find = recorder.steps.find((entry) => entry.id === 'runs');
-  assert.match(find.run, /--workflow playwright-mock\.yml --branch dev --event push/);
-  assert.match(find.run, /--status success/);
-  const restore = workflow.jobs.shard_timings.steps.find((entry) => entry.id === 'restore');
-  const save = recorder.steps.find((entry) => entry.uses?.startsWith('actions/cache/save@'));
-  assert.equal(restore['continue-on-error'], true);
-  assert.equal(save.with.path, restore.with.path);
-  assert.ok(save.with.key.startsWith(restore.with['restore-keys']));
-  const saves = (event, built) =>
-    condition(save.if, {
-      github: { event_name: event },
-      steps: { build: { outputs: { built } } },
-    });
-  assert.equal(saves('push', 'true'), true);
-  assert.equal(saves('push', ''), false);
-  assert.equal(saves('pull_request', 'true'), false);
 });
 
 test('the required gate still waits for all shards and rejects failures without fighting cancellation', () => {

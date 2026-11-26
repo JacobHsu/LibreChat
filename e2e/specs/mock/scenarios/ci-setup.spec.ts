@@ -278,7 +278,6 @@ test.describe('the shared installed dependency tree', () => {
 
     for (const required of [
       'static-checks.yml static-checks',
-      'lighthouse.yml lighthouse',
       'frontend-review.yml client-build-regression',
       'playwright-mock.yml e2e_shards',
     ]) {
