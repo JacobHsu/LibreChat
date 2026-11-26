@@ -193,6 +193,7 @@ codedb.snapshot
 scripts/activity-labels/results/
 
 !e2e/lighthouse/librechat.yaml
+!/examples/sdk-runtime/librechat.yaml
 /.lighthouse/
 /e2e/lighthouse/.test-results/
 /e2e/rum/.test-results/
