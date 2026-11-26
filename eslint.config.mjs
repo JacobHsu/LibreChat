@@ -77,7 +77,6 @@ export default [
       'meili_data/**/*',
       '**/node_modules/**/*',
       'venv/**/*',
-      '.devcontainer/**/*',
     ],
   },
   ...fixupConfigRules(
