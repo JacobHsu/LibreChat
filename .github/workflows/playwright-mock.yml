@@ -17,10 +17,7 @@ on:
       - '!docker-compose*.yml'
       - '!deploy-compose*.yml'
       - '!docker-compose.override.yml.example'
-      - '!.devcontainer/**'
       - '!.vscode/**'
-      - '!.codex/**'
-      - '!.oss-scanner/**'
   # Post-merge safety net, as backend-review.yml and frontend-review.yml have for jest. A
   # regression that reaches dev fails this suite on every open pull request, and without a run
   # on dev itself nothing names the merge that caused it. A push runs the pull request profile
@@ -41,10 +38,7 @@ on:
       - '!docker-compose*.yml'
       - '!deploy-compose*.yml'
       - '!docker-compose.override.yml.example'
-      - '!.devcontainer/**'
       - '!.vscode/**'
-      - '!.codex/**'
-      - '!.oss-scanner/**'
   # The merge queue tests the commit about to land on dev. It has no path filter and runs
   # the pull request profile with no lane narrowed, so a failure in the queue is one the
   # pull request's own checks can reproduce.

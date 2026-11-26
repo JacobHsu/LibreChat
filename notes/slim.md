@@ -20,12 +20,15 @@
 | `otel/langfuse-fanout/` | 多租戶 Langfuse 追蹤分送閘道（Go + OpenTelemetry Collector） | 單一站點不需要把追蹤分送到多個租戶的 Langfuse 專案 | PR #13（A 組） |
 | `docker-compose.langfuse-fanout.yml`、`deploy-compose.langfuse-fanout.yml` | 啟動上述閘道的 compose 疊加檔 | 隨閘道一起移除 | PR #13（A 組） |
 | `.env.example` 的 fanout 閘道變數 | `LANGFUSE_FANOUT_LISTEN_ADDR`、`..._REDIS_*`、`..._CENTRAL_*` 等閘道專用設定 | 閘道已移除；LibreChat 本身會讀的 4 個 app 端開關（`LANGFUSE_FANOUT_ENABLED` 等）保留 | PR #13（A 組） |
-| `playwright-mock.yml` 的 timings 讀取步驟 | `shard_timings` job 裡讀取 `e2e-shard-timings-*` 快取的步驟 | 寫入端 `playwright-timings.yml` 不在此 fork，永遠讀不到；shard 一律用 `e2e/timings.mock.json` | CI 修正 PR |
+| `playwright-mock.yml` 的 timings 讀取步驟 | `shard_timings` job 裡讀取 `e2e-shard-timings-*` 快取的步驟 | 寫入端 `playwright-timings.yml` 不在此 fork，永遠讀不到；shard 一律用 `e2e/timings.mock.json` | PR #14 |
+| `.devcontainer/` | VS Code Dev Container 設定（Dockerfile、compose、devcontainer.json） | 直接在本機開發，不用 Dev Container | D 組 |
+| `.codex` | 0 位元組的空檔案（OpenAI Codex 工具的標記） | 沒有內容也沒有引用；`.gitignore` 的 `/.codex/` 保留，避免日後工具產物被 commit | D 組 |
+| `.oss-scanner/` | 上游開源安全掃描器的 Dockerfile 與 `threat_model.md` | 上游團隊的掃描流程；它引用的 `.github/SECURITY.md` 快照時就不在 | D 組 |
+| `eslint.config.mjs` 的 `.devcontainer/**/*` 忽略規則 | ESLint ignores 清單的一行 | 隨 `.devcontainer/` 一起移除 | D 組 |
 
 連帶修改（不是刪除，但同步後要一起處理）：
 
 - `otel/langfuse-fanout/README.md`、`.env.example`：拿掉 Helm 相關敘述（PR #12；fanout README 已在 A 組整份移除）。
-- `.oss-scanner/threat_model.md`：低風險路徑清單拿掉 `helm/`（PR #12）。
 - `packages/api/src/protection/conformance/README.md`：Trace exports 那列原本指向
   `otel/langfuse-fanout/otelcol.yaml`，改成註明閘道不隨此 fork 提供（PR #13）。
 - `.github/scripts/playwright-matrix.test.mjs`：刪掉檢查 `playwright-timings.yml` 的測試，
@@ -34,7 +37,8 @@
   timings 寫入端（CI 修正 PR）。
 - `.github/workflows/playwright-mock.yml`：`pull_request` 與 `push` 的 `paths` 多排除
   `.gitignore`、`.env.example`、`librechat.example.yaml`、`rag.yml`、compose 檔、
-  `.devcontainer/`、`.vscode/`、`.codex/`、`.oss-scanner/`，只改這些檔案的 PR 不跑約 26 分鐘的 e2e。
+  `.vscode/`，只改這些檔案的 PR 不跑約 26 分鐘的 e2e（PR #16；D 組刪除目錄後，
+  `.devcontainer/`、`.codex/`、`.oss-scanner/` 三條排除也一併拿掉）。
   採黑名單：沒列到的檔案一律照跑。這些檔案都已確認沒有 e2e spec 讀取；新增排除前要再確認一次。
 - `e2e/specs/mock/scenarios/ci-setup.spec.ts`：共用依賴快取的必要參與者清單拿掉
   `lighthouse.yml lighthouse`，原因同上（CI 修正 PR）。
@@ -105,7 +109,6 @@ tag-images.yml                windows-private-files.yml     workspace-acceptance
 |---|---|---|
 | B. 效能壓測 e2e | `e2e/benchmarks*`、`bombadil/`、`perf/`、`lighthouse/` 與對應 playwright config | `package.json` 約 20 個 script、`@antithesishq/bombadil` 依賴、`AGENTS.md` 的 lighthouse 要求 |
 | C. Slack 頻道閘道 | `packages/channel-gateway`、`docker-compose.channels*.yml`、`docker-compose.slack-workspaces.yml` | 3 個 CI workflow 與 `scripts/sort-imports.mts` 有引用 |
-| D. 雜項工具設定 | `.devcontainer/`、`.codex/`、`.oss-scanner/` | 低 |
 
 ---
 
@@ -120,7 +123,10 @@ git rm -r -q --ignore-unmatch \
   helm \
   otel/langfuse-fanout \
   docker-compose.langfuse-fanout.yml \
-  deploy-compose.langfuse-fanout.yml
+  deploy-compose.langfuse-fanout.yml \
+  .devcontainer \
+  .codex \
+  .oss-scanner
 
 # 第 2 節：只保留 7 個 workflow
 keep='agents-integration-tests|backend-review|cache-integration-tests|frontend-review|merge-gate|playwright-mock|static-checks'
@@ -132,7 +138,7 @@ git ls-files .github/workflows | grep -v -E "/($keep)\.yml$" | xargs -r git rm -
 - `package.json`：刪掉 `e2e:github` script。
 - `.gitignore`：刪掉 `# Helm` 區塊。
 - `.env.example`：fanout 段落只留 4 個 app 端開關（見第 1 節）。
-- `.oss-scanner/threat_model.md`：低風險路徑清單拿掉 `helm/`。
+- `eslint.config.mjs`：ignores 清單刪掉 `.devcontainer/**/*`。
 - `packages/api/src/protection/conformance/README.md`：Trace exports 列的 `otelcol.yaml` 路徑。
 - `.github/scripts/playwright-matrix.test.mjs`、`e2e/specs/mock/scenarios/ci-setup.spec.ts`：
   移除對 `playwright-timings.yml`、`lighthouse.yml` 的依賴（見第 1 節）。
@@ -145,5 +151,5 @@ git ls-files .github/workflows | grep -v -E "/($keep)\.yml$" | xargs -r git rm -
 最後搜尋殘留引用，確認沒有指向已刪路徑的設定：
 
 ```sh
-git grep -n -E "scripts/quality|helm/|otel/langfuse-fanout|langfuse-fanout\.yml"
+git grep -n -E "scripts/quality|helm/|otel/langfuse-fanout|langfuse-fanout\.yml|\.devcontainer|\.oss-scanner|\.codex"
 ```
