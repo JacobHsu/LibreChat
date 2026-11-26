@@ -80,7 +80,7 @@ tag-images.yml                windows-private-files.yml     workspace-acceptance
 
 | 檔案 | 擋掉它的規則 | 處理 |
 |---|---|---|
-| `examples/sdk-runtime/librechat.yaml` | `librechat.yaml` | 尚未處理，另開 PR |
+| `examples/sdk-runtime/librechat.yaml` | `librechat.yaml` | **已補回**：SDK Agents 範例的設定片段，`docs/sdk/agents.md` 會引用；加了 `!/examples/sdk-runtime/librechat.yaml` 例外，根目錄自己的 `librechat.yaml` 仍被忽略 |
 | `redis-config/certs/dump.rdb` | `dump.rdb` | **刻意不補回**：這是 Redis 的資料快照檔，上游在 2025-07（#8457）隨 Redis 重構一起 commit，放在 `certs/` 下，看起來是執行產物而非刻意追蹤的檔案；沒有它 `cache-integration` CI 照樣通過 |
 | `.claude/skills/` 底下 9 個檔案 | `/.claude/` | 不補回：上游團隊的 Claude Code 技能設定 |
 
@@ -132,8 +132,8 @@ git ls-files .github/workflows | grep -v -E "/($keep)\.yml$" | xargs -r git rm -
 - `packages/api/src/protection/conformance/README.md`：Trace exports 列的 `otelcol.yaml` 路徑。
 - `.github/scripts/playwright-matrix.test.mjs`、`e2e/specs/mock/scenarios/ci-setup.spec.ts`：
   移除對 `playwright-timings.yml`、`lighthouse.yml` 的依賴（見第 1 節）。
-- `.gitignore`：保留 `*.d.ts` 的 `!` 例外規則；用新的上游 `.gitignore` 覆蓋時要加回去，
-  否則上面那 6 個型別宣告檔會再次消失。
+- `.gitignore`：保留 `*.d.ts` 與 `!/examples/sdk-runtime/librechat.yaml` 的 `!` 例外規則；
+  用新的上游 `.gitignore` 覆蓋時要加回去，否則那 6 個型別宣告檔與範例設定片段會再次消失。
 - 第 2 節 `.github/` 底下的其他檔案與頂層項目：視需要刪除。
 
 最後搜尋殘留引用，確認沒有指向已刪路徑的設定：
